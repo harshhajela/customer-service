@@ -1,10 +1,9 @@
 package com.hajela.customerservice;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class CustomerServiceApplicationTests {
+
+class CustomerServiceApplicationTests extends BaseIntegrationTest {
 
 	@Test
 	void contextLoads() {

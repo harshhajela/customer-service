@@ -3,16 +3,13 @@ package com.hajela.customerservice.controller;
 import com.hajela.customerservice.BaseIntegrationTest;
 import com.hajela.customerservice.domain.AllCustomers;
 import com.hajela.customerservice.domain.CustomerDto;
-import com.hajela.customerservice.repository.CustomerRepository;
 import io.restassured.RestAssured;
 import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,23 +30,12 @@ class CustomerControllerTest extends BaseIntegrationTest {
     @LocalServerPort
     private int serverPort;
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
     private final RestAssuredConfig config = new RestAssuredConfig().jsonConfig(jsonConfig().numberReturnType(BIG_DECIMAL));
 
     @BeforeEach
     void setUpRestAssured() {
         RestAssured.port = serverPort;
         RestAssured.basePath = "/v1/customers";
-        customerRepository.deleteAll(customerRepository.findAll());
-        log.info("Total no of records: {}", customerRepository.findAll().size());
-    }
-
-    @AfterEach
-    void cleanUp() {
-        customerRepository.deleteAll(customerRepository.findAll());
-        log.info("Total no of records after deletion: {}", customerRepository.findAll().size());
     }
 
     @Test

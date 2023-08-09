@@ -1,10 +1,7 @@
 package com.hajela.customerservice;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.TestInfo;
+import org.junit.jupiter.api.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.Rollback;
@@ -18,6 +15,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @Rollback
 @Transactional
 @ActiveProfiles({"test"})
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {CustomerServiceApplication.class})
 public abstract class BaseIntegrationTest {
 
@@ -28,15 +26,30 @@ public abstract class BaseIntegrationTest {
 
     @DynamicPropertySource
     static void setProperties(DynamicPropertyRegistry dymDynamicPropertyRegistry) {
+        log.info("Setting postgres properties");
+        startContainerIfNotRunning(); // Ensure container is started
         dymDynamicPropertyRegistry.add("spring.datasource.url", postgresContainer::getJdbcUrl);
         dymDynamicPropertyRegistry.add("spring.datasource.username", postgresContainer::getUsername);
         dymDynamicPropertyRegistry.add("spring.datasource.password", postgresContainer::getPassword);
     }
 
-    @BeforeAll
-    public static void setUp() {
-        postgresContainer.start();
+    private static void startContainerIfNotRunning() {
+        if (!postgresContainer.isRunning()) {
+            log.info("Starting postgres container");
+            postgresContainer.start();
+        }
     }
+
+    protected int getMappedPort() {
+        startContainerIfNotRunning(); // Ensure container is started
+        return postgresContainer.getFirstMappedPort();
+    }
+
+    /*@BeforeAll
+    public static void setUp() {
+        log.info("Starting postgres container");
+        postgresContainer.start();
+    }*/
 
     @BeforeEach
     public void SetUpTest(TestInfo testInfo) {
@@ -45,7 +58,7 @@ public abstract class BaseIntegrationTest {
 
     @AfterAll
     public static void tearDown() {
-        // Stop and remove the PostgreSQL container after all tests are finished
+        log.info("Stopping postgres container");
         postgresContainer.stop();
     }
 
